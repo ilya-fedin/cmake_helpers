@@ -7,41 +7,13 @@
 add_library(external_qr_code_generator INTERFACE IMPORTED GLOBAL)
 add_library(desktop-app::external_qr_code_generator ALIAS external_qr_code_generator)
 
-if (DESKTOP_APP_USE_PACKAGED)
-    find_package(unofficial-nayuki-qr-code-generator QUIET)
-    if (unofficial-nayuki-qr-code-generator_FOUND)
-        target_link_libraries(external_qr_code_generator INTERFACE unofficial::nayuki-qr-code-generator::nayuki-qr-code-generator)
-        return()
-    endif()
-
-    find_library(DESKTOP_APP_QRCODE_LIBRARIES NAMES qrcodegencpp)
-    find_path(DESKTOP_APP_QRCODE_INCLUDE_DIRS NAMES qrcodegen.hpp QrCode.hpp PATH_SUFFIXES qrcodegencpp qrcodegen)
-
-    if (DESKTOP_APP_QRCODE_LIBRARIES AND DESKTOP_APP_QRCODE_INCLUDE_DIRS)
-        target_include_directories(external_qr_code_generator SYSTEM INTERFACE ${DESKTOP_APP_QRCODE_INCLUDE_DIRS})
-        target_link_libraries(external_qr_code_generator INTERFACE ${DESKTOP_APP_QRCODE_LIBRARIES})
-        return()
-    endif()
+find_package(unofficial-nayuki-qr-code-generator QUIET)
+if (unofficial-nayuki-qr-code-generator_FOUND)
+    target_link_libraries(external_qr_code_generator INTERFACE unofficial::nayuki-qr-code-generator::nayuki-qr-code-generator)
+    return()
 endif()
 
-add_library(external_qr_code_generator_bundled STATIC)
-init_target(external_qr_code_generator_bundled "(external)")
-
-set(qr_loc ${third_party_loc}/QR)
-set(qr_src ${qr_loc}/cpp)
-
-nice_target_sources(external_qr_code_generator_bundled ${qr_src}
-PRIVATE
-    qrcodegen.cpp
-    qrcodegen.hpp
-)
-
-target_include_directories(external_qr_code_generator_bundled
-PUBLIC
-    ${qr_src}
-)
-
-target_link_libraries(external_qr_code_generator
-INTERFACE
-    external_qr_code_generator_bundled
-)
+find_library(DESKTOP_APP_QRCODE_LIBRARIES NAMES qrcodegencpp REQUIRED)
+find_path(DESKTOP_APP_QRCODE_INCLUDE_DIRS NAMES qrcodegen.hpp QrCode.hpp PATH_SUFFIXES qrcodegencpp qrcodegen)
+target_include_directories(external_qr_code_generator SYSTEM INTERFACE ${DESKTOP_APP_QRCODE_INCLUDE_DIRS})
+target_link_libraries(external_qr_code_generator INTERFACE ${DESKTOP_APP_QRCODE_LIBRARIES})

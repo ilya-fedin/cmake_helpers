@@ -15,9 +15,9 @@ set_target_properties(external_qt_static_plugins_kimageformats PROPERTIES AUTOMO
 
 nice_target_sources(external_qt_static_plugins_kimageformats ${kimageformats_src}
 PRIVATE
-    avif.cpp
-    heif.cpp
-    jxl.cpp
+    $<$<OR:$<TARGET_EXISTS:avif>,$<TARGET_EXISTS:PkgConfig::DESKTOP_APP_AVIF>>:avif.cpp>
+    $<$<TARGET_EXISTS:heif>:heif.cpp>
+    $<$<OR:$<TARGET_EXISTS:libjxl::libjxl>,$<TARGET_EXISTS:PkgConfig::DESKTOP_APP_JXL>>:jxl.cpp>
     qoi.cpp
     scanlineconverter.cpp
 )
@@ -27,102 +27,28 @@ PRIVATE
     QT_STATICPLUGIN
 )
 
+find_package(libavif QUIET)
+find_package(libheif QUIET)
+find_package(libjxl QUIET)
+find_package(PkgConfig)
+if (PkgConfig_FOUND)
+    if (NOT libavif_FOUND)
+        pkg_check_modules(DESKTOP_APP_AVIF IMPORTED_TARGET libavif)
+    endif()
+    if (NOT libjxl_FOUND)
+        pkg_check_modules(DESKTOP_APP_JXL IMPORTED_TARGET libjxl libjxl_threads)
+    endif()
+endif()
+
 target_link_libraries(external_qt_static_plugins_kimageformats
 PRIVATE
     desktop-app::external_qt
+    $<TARGET_NAME_IF_EXISTS:avif>
+    $<TARGET_NAME_IF_EXISTS:PkgConfig::DESKTOP_APP_AVIF>
+    $<TARGET_NAME_IF_EXISTS:heif>
+    $<TARGET_NAME_IF_EXISTS:libjxl::libjxl>
+    $<TARGET_NAME_IF_EXISTS:PkgConfig::DESKTOP_APP_JXL>
 )
-
-if (DESKTOP_APP_USE_PACKAGED OR LINUX)
-    find_package(libavif QUIET)
-    find_package(libheif QUIET)
-    find_package(libjxl QUIET)
-    find_package(PkgConfig)
-    if (PkgConfig_FOUND)
-        if (NOT libavif_FOUND)
-            pkg_check_modules(DESKTOP_APP_AVIF IMPORTED_TARGET libavif)
-        endif()
-        if (NOT libjxl_FOUND)
-            pkg_check_modules(DESKTOP_APP_JXL IMPORTED_TARGET libjxl libjxl_threads)
-        endif()
-    endif()
-
-    if (NOT libavif_FOUND AND NOT DESKTOP_APP_AVIF_FOUND)
-        remove_target_sources(external_qt_static_plugins_kimageformats ${kimageformats_src} avif.cpp)
-    endif()
-
-    if (NOT libheif_FOUND)
-        remove_target_sources(external_qt_static_plugins_kimageformats ${kimageformats_src} heif.cpp)
-    endif()
-
-    if (NOT libjxl_FOUND AND NOT DESKTOP_APP_JXL_FOUND)
-        remove_target_sources(external_qt_static_plugins_kimageformats ${kimageformats_src} jxl.cpp)
-    endif()
-
-    target_link_libraries(external_qt_static_plugins_kimageformats
-    PRIVATE
-        $<TARGET_NAME_IF_EXISTS:avif>
-        $<TARGET_NAME_IF_EXISTS:PkgConfig::DESKTOP_APP_AVIF>
-        $<TARGET_NAME_IF_EXISTS:heif>
-        $<TARGET_NAME_IF_EXISTS:libjxl::libjxl>
-        $<TARGET_NAME_IF_EXISTS:PkgConfig::DESKTOP_APP_JXL>
-    )
-elseif (WIN32)
-    target_compile_definitions(external_qt_static_plugins_kimageformats
-    PRIVATE
-        JXL_STATIC_DEFINE
-        JXL_THREADS_STATIC_DEFINE
-        JXL_CMS_STATIC_DEFINE
-        LIBHEIF_STATIC_BUILD
-    )
-
-    target_include_directories(external_qt_static_plugins_kimageformats SYSTEM
-    PRIVATE
-        ${libs_loc}/local/include
-    )
-
-    target_link_libraries(external_qt_static_plugins_kimageformats
-    PRIVATE
-        ${libs_loc}/libavif/$<IF:$<CONFIG:Debug>,Debug,Release>/avif.lib
-        ${libs_loc}/libheif/libheif/$<IF:$<CONFIG:Debug>,Debug,Release>/heif.lib
-        ${libs_loc}/libde265/libde265/$<IF:$<CONFIG:Debug>,Debug,Release>/libde265.lib
-        ${libs_loc}/dav1d/builddir-$<IF:$<CONFIG:Debug>,debug,release>/src/libdav1d.a
-        ${libs_loc}/libjxl/lib/$<IF:$<CONFIG:Debug>,Debug,Release>/jxl.lib
-        ${libs_loc}/libjxl/lib/$<IF:$<CONFIG:Debug>,Debug,Release>/jxl_cms.lib
-        ${libs_loc}/libjxl/lib/$<IF:$<CONFIG:Debug>,Debug,Release>/jxl_threads.lib
-        ${libs_loc}/libjxl/third_party/highway/$<IF:$<CONFIG:Debug>,Debug,Release>/hwy.lib
-        ${libs_loc}/libjxl/third_party/brotli/$<IF:$<CONFIG:Debug>,Debug,Release>/brotlidec.lib
-        ${libs_loc}/libjxl/third_party/brotli/$<IF:$<CONFIG:Debug>,Debug,Release>/brotlienc.lib
-        ${libs_loc}/libjxl/third_party/brotli/$<IF:$<CONFIG:Debug>,Debug,Release>/brotlicommon.lib
-    )
-elseif (APPLE)
-    target_compile_definitions(external_qt_static_plugins_kimageformats
-    PRIVATE
-        JXL_STATIC_DEFINE
-        JXL_THREADS_STATIC_DEFINE
-        JXL_CMS_STATIC_DEFINE
-        LIBHEIF_STATIC_BUILD
-    )
-
-    target_include_directories(external_qt_static_plugins_kimageformats SYSTEM
-    PRIVATE
-        ${libs_loc}/local/include
-    )
-    target_link_libraries(external_qt_static_plugins_kimageformats
-    PRIVATE
-        ${libs_loc}/local/lib/libavif.a
-        ${libs_loc}/local/lib/libheif.a
-        ${libs_loc}/local/lib/libde265.a
-        ${libs_loc}/local/lib/libdav1d.a
-        ${libs_loc}/local/lib/libjxl.a
-        ${libs_loc}/local/lib/libjxl_cms.a
-        ${libs_loc}/local/lib/libjxl_threads.a
-        ${libs_loc}/local/lib/libhwy.a
-        ${libs_loc}/local/lib/libbrotlidec.a
-        ${libs_loc}/local/lib/libbrotlienc.a
-        ${libs_loc}/local/lib/libbrotlicommon.a
-        ${libs_loc}/local/lib/liblcms2.a
-    )
-endif()
 
 add_library(external_qt_static_plugins_kimageformats_init OBJECT)
 add_library(desktop-app::external_qt_static_plugins_kimageformats_init ALIAS external_qt_static_plugins_kimageformats_init)
@@ -138,18 +64,16 @@ PRIVATE
     desktop-app::external_qt
 )
 
-if (DESKTOP_APP_USE_PACKAGED OR LINUX)
-    if (NOT libavif_FOUND AND NOT DESKTOP_APP_AVIF_FOUND)
-        target_compile_definitions(external_qt_static_plugins_kimageformats_init PRIVATE QT_STATIC_PLUGINS_DISABLE_AVIF)
-    endif()
+if (NOT libavif_FOUND AND NOT DESKTOP_APP_AVIF_FOUND)
+    target_compile_definitions(external_qt_static_plugins_kimageformats_init PRIVATE QT_STATIC_PLUGINS_DISABLE_AVIF)
+endif()
 
-    if (NOT libheif_FOUND)
-        target_compile_definitions(external_qt_static_plugins_kimageformats_init PRIVATE QT_STATIC_PLUGINS_DISABLE_HEIF)
-    endif()
+if (NOT libheif_FOUND)
+    target_compile_definitions(external_qt_static_plugins_kimageformats_init PRIVATE QT_STATIC_PLUGINS_DISABLE_HEIF)
+endif()
 
-    if (NOT libjxl_FOUND AND NOT DESKTOP_APP_JXL_FOUND)
-        target_compile_definitions(external_qt_static_plugins_kimageformats_init PRIVATE QT_STATIC_PLUGINS_DISABLE_JXL)
-    endif()
+if (NOT libjxl_FOUND AND NOT DESKTOP_APP_JXL_FOUND)
+    target_compile_definitions(external_qt_static_plugins_kimageformats_init PRIVATE QT_STATIC_PLUGINS_DISABLE_JXL)
 endif()
 
 target_link_libraries(external_qt_static_plugins_kimageformats

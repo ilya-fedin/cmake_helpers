@@ -7,12 +7,6 @@
 add_library(external_openssl INTERFACE IMPORTED GLOBAL)
 add_library(desktop-app::external_openssl ALIAS external_openssl)
 
-if (WIN32)
-    set(openssl_lib_loc ${libs_loc}/openssl3/out)
-elseif (APPLE)
-    set(openssl_lib_loc ${libs_loc}/openssl3)
-endif()
-
 add_subdirectory(openssl_common)
 add_subdirectory(openssl_ssl)
 add_subdirectory(openssl_crypto)

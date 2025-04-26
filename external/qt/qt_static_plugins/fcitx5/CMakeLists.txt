@@ -47,6 +47,9 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(DESKTOP_APP_XKBCOMMON REQUIRED IMPORTED_TARGET xkbcommon)
 
 add_subdirectory(fcitx5_qt_dbusaddons)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(DESKTOP_APP_XKBCOMMON REQUIRED IMPORTED_TARGET xkbcommon)
+
 target_link_libraries(external_qt_static_plugins_fcitx5
 PRIVATE
     desktop-app::external_qt_static_plugins_fcitx5_dbusaddons

@@ -7,23 +7,5 @@
 add_library(external_crashpad INTERFACE IMPORTED GLOBAL)
 add_library(desktop-app::external_crashpad ALIAS external_crashpad)
 
-if (DESKTOP_APP_USE_PACKAGED)
-    find_package(crashpad REQUIRED)
-    target_link_libraries(external_crashpad INTERFACE crashpad::crashpad)
-    return()
-endif()
-
-target_include_directories(external_crashpad SYSTEM
-INTERFACE
-    ${libs_loc}/crashpad
-    ${libs_loc}/crashpad/gen
-    ${libs_loc}/crashpad/third_party/mini_chromium
-)
-
-set(crashpad_lib_loc ${libs_loc}/crashpad/out/$<IF:$<CONFIG:Debug>,Debug,Release>)
-
-target_link_libraries(external_crashpad
-INTERFACE
-    ${crashpad_lib_loc}/libcrashpad_client.a
-    bsm
-)
+find_package(crashpad REQUIRED)
+target_link_libraries(external_crashpad INTERFACE crashpad::crashpad)

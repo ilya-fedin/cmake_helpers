@@ -11,12 +11,6 @@ if (build_macstore)
         MAC_USE_BREAKPAD
     )
 endif()
-if (NOT DESKTOP_APP_USE_PACKAGED)
-    target_include_directories(common_options SYSTEM
-    INTERFACE
-        ${libs_loc}/local/include
-    )
-endif()
 
 target_compile_options(common_options
 INTERFACE

@@ -13,13 +13,5 @@ INTERFACE
     BOOST_REGEX_NO_W32
 )
 
-if (DESKTOP_APP_USE_PACKAGED OR LINUX)
-    find_package(Boost COMPONENTS regex REQUIRED)
-    target_link_libraries(external_boost_regex INTERFACE Boost::regex)
-    return()
-endif()
-
-target_include_directories(external_boost_regex SYSTEM
-INTERFACE
-    ${libs_loc}/regex/include
-)
+find_package(Boost COMPONENTS regex REQUIRED)
+target_link_libraries(external_boost_regex INTERFACE Boost::regex)
