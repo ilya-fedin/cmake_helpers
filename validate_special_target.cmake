@@ -41,6 +41,7 @@ if (VCPKG)
         set(VCPKG_TARGET_TRIPLET "$ENV{VSCMD_ARG_TGT_ARCH}-windows" CACHE STRING "Vcpkg target triplet (ex. x86-windows)")
     endif()
 
+    set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES ${CMAKE_CURRENT_LIST_DIR}/external/cmake-conan/conan_provider.cmake CACHE FILEPATH "")
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the type of build")
     set(PKG_CONFIG_ARGN "--static" CACHE STRING "Arguments to supply to pkg-config")
 endif()
