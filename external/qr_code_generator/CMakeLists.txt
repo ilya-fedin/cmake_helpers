@@ -8,6 +8,12 @@ add_library(external_qr_code_generator INTERFACE IMPORTED GLOBAL)
 add_library(desktop-app::external_qr_code_generator ALIAS external_qr_code_generator)
 
 if (DESKTOP_APP_USE_PACKAGED)
+    find_package(unofficial-nayuki-qr-code-generator QUIET)
+    if (unofficial-nayuki-qr-code-generator_FOUND)
+        target_link_libraries(external_qr_code_generator INTERFACE unofficial::nayuki-qr-code-generator::nayuki-qr-code-generator)
+        return()
+    endif()
+
     find_library(DESKTOP_APP_QRCODE_LIBRARIES NAMES qrcodegencpp)
     find_path(DESKTOP_APP_QRCODE_INCLUDE_DIRS NAMES qrcodegen.hpp QrCode.hpp PATH_SUFFIXES qrcodegencpp qrcodegen)
 

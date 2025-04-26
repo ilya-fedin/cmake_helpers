@@ -8,6 +8,13 @@ add_library(external_ffmpeg INTERFACE IMPORTED GLOBAL)
 add_library(desktop-app::external_ffmpeg ALIAS external_ffmpeg)
 
 if (DESKTOP_APP_USE_PACKAGED OR LINUX)
+    find_package(FFMPEG QUIET)
+    if (FFMPEG_FOUND)
+        target_include_directories(external_ffmpeg SYSTEM INTERFACE ${FFMPEG_INCLUDE_DIRS})
+        target_link_libraries(external_ffmpeg INTERFACE ${FFMPEG_LIBRARIES})
+        return()
+    endif()
+
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(DESKTOP_APP_FFMPEG REQUIRED IMPORTED_TARGET
         libavcodec

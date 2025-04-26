@@ -8,6 +8,12 @@ if (DESKTOP_APP_USE_PACKAGED)
     add_library(external_rnnoise INTERFACE IMPORTED GLOBAL)
     add_library(desktop-app::external_rnnoise ALIAS external_rnnoise)
 
+    find_package(rnnoise QUIET)
+    if (rnnoise_FOUND)
+        target_link_libraries(external_rnnoise INTERFACE rnnoise::rnnoise)
+        return()
+    endif()
+
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(DESKTOP_APP_RNNOISE REQUIRED IMPORTED_TARGET rnnoise)
 
