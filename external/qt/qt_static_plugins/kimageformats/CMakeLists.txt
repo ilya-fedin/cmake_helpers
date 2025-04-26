@@ -35,12 +35,15 @@ PRIVATE
 if (DESKTOP_APP_USE_PACKAGED OR LINUX)
     find_package(libavif QUIET)
     find_package(libheif QUIET)
+    find_package(libjxl QUIET)
     find_package(PkgConfig)
     if (PkgConfig_FOUND)
         if (NOT libavif_FOUND)
             pkg_check_modules(DESKTOP_APP_AVIF IMPORTED_TARGET libavif)
         endif()
-        pkg_check_modules(DESKTOP_APP_JXL IMPORTED_TARGET libjxl libjxl_threads)
+        if (NOT libjxl_FOUND)
+            pkg_check_modules(DESKTOP_APP_JXL IMPORTED_TARGET libjxl libjxl_threads)
+        endif()
     endif()
 
     if (NOT libavif_FOUND AND NOT DESKTOP_APP_AVIF_FOUND)
@@ -51,7 +54,7 @@ if (DESKTOP_APP_USE_PACKAGED OR LINUX)
         remove_target_sources(external_qt_static_plugins_kimageformats ${kimageformats_src} heif.cpp)
     endif()
 
-    if (NOT DESKTOP_APP_JXL_FOUND)
+    if (NOT libjxl_FOUND AND NOT DESKTOP_APP_JXL_FOUND)
         remove_target_sources(external_qt_static_plugins_kimageformats ${kimageformats_src} jxl.cpp)
     endif()
 
@@ -60,6 +63,7 @@ if (DESKTOP_APP_USE_PACKAGED OR LINUX)
         $<TARGET_NAME_IF_EXISTS:avif>
         $<TARGET_NAME_IF_EXISTS:PkgConfig::DESKTOP_APP_AVIF>
         $<TARGET_NAME_IF_EXISTS:heif>
+        $<TARGET_NAME_IF_EXISTS:libjxl::libjxl>
         $<TARGET_NAME_IF_EXISTS:PkgConfig::DESKTOP_APP_JXL>
     )
 elseif (WIN32)
@@ -143,7 +147,7 @@ if (DESKTOP_APP_USE_PACKAGED OR LINUX)
         target_compile_definitions(external_qt_static_plugins_kimageformats_init PRIVATE QT_STATIC_PLUGINS_DISABLE_HEIF)
     endif()
 
-    if (NOT DESKTOP_APP_JXL_FOUND)
+    if (NOT libjxl_FOUND AND NOT DESKTOP_APP_JXL_FOUND)
         target_compile_definitions(external_qt_static_plugins_kimageformats_init PRIVATE QT_STATIC_PLUGINS_DISABLE_JXL)
     endif()
 endif()

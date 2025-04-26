@@ -8,6 +8,12 @@ add_library(external_hunspell INTERFACE IMPORTED GLOBAL)
 add_library(desktop-app::external_hunspell ALIAS external_hunspell)
 
 if (DESKTOP_APP_USE_PACKAGED)
+    find_package(hunspell QUIET)
+    if (hunspell_FOUND)
+        target_link_libraries(external_hunspell INTERFACE hunspell::hunspell)
+        return()
+    endif()
+
     find_package(PkgConfig)
     if (PkgConfig_FOUND)
         pkg_check_modules(DESKTOP_APP_HUNSPELL IMPORTED_TARGET hunspell)
