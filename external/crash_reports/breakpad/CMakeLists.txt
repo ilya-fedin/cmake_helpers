@@ -8,6 +8,12 @@ add_library(external_breakpad INTERFACE IMPORTED GLOBAL)
 add_library(desktop-app::external_breakpad ALIAS external_breakpad)
 
 if (DESKTOP_APP_USE_PACKAGED OR LINUX)
+    find_package(unofficial-breakpad QUIET)
+    if (unofficial-breakpad_FOUND)
+        target_link_libraries(external_breakpad INTERFACE unofficial::breakpad::libbreakpad_client)
+        return()
+    endif()
+
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(DESKTOP_APP_BREAKPAD REQUIRED IMPORTED_TARGET breakpad-client)
     target_link_libraries(external_breakpad INTERFACE PkgConfig::DESKTOP_APP_BREAKPAD)
