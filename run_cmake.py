@@ -54,7 +54,7 @@ def run(project, arguments, buildType=''):
                 if len(target) > 0:
                     cmake.append('-DDESKTOP_APP_SPECIAL_TARGET=' + target)
 
-    cmake.extend(['-Werror=dev', '-Werror=deprecated', '--warn-uninitialized', '..' if not buildType else '../..'])
+    cmake.extend(['-Werror=dev', '-Werror=deprecated', '..' if not buildType else '../..'])
     command = '"' + '" "'.join(cmake) + '"'
 
     if not os.path.exists(basePath):
